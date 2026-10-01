@@ -17,13 +17,12 @@ interface EditorProps {
 export default function Editor({ submissionId, userName, userColor, onEditorReady }: EditorProps) {
   const [status, setStatus] = useState('connecting');
   const [ydoc] = useState(() => new Y.Doc());
-  
-  const provider = new WebsocketProvider(
+  const [provider] = useState(() => new WebsocketProvider(
     `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/submission/${submissionId}`,
     submissionId,
     ydoc
-  );
-
+  ));
+  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -52,6 +51,16 @@ export default function Editor({ submissionId, userName, userColor, onEditorRead
   }, [editor, onEditorReady]);
 
   useEffect(() => {
+    // Update user info when props change
+    if (editor) {
+      editor.commands.updateUser({
+        name: userName,
+        color: userColor,
+      });
+    }
+  }, [editor, userName, userColor]);
+
+  useEffect(() => {
     provider.on('status', (event: any) => {
       setStatus(event.status);
     });
@@ -60,7 +69,7 @@ export default function Editor({ submissionId, userName, userColor, onEditorRead
       provider.destroy();
       ydoc.destroy();
     };
-  }, [submissionId]);
+  }, [provider, ydoc]);
 
   if (!editor) return null;
 

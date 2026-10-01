@@ -232,6 +232,12 @@ export default function App() {
     </div>
   );
 
+  const userColor = user ? (() => {
+    const hash = Array.from(user.uid).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#06b6d4'];
+    return colors[hash % colors.length];
+  })() : '#6366f1';
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Sidebar */}
@@ -403,7 +409,7 @@ export default function App() {
                   <Editor 
                     submissionId={currentSubmission.id} 
                     userName={user.displayName || 'Anonymous'} 
-                    userColor="#6366f1"
+                    userColor={userColor}
                     onEditorReady={setEditorInstance}
                   />
                 </div>

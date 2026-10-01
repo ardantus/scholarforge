@@ -1,7 +1,13 @@
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || "",
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
 export async function performPreFlightCheck(title: string, abstract: string, content: string) {
   const prompt = `
@@ -26,11 +32,16 @@ export async function performPreFlightCheck(title: string, abstract: string, con
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    // Clean JSON from markdown if needed
-    const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
-    return JSON.parse(jsonStr);
+    const response = await ai.models.generateContent({
+      model: "gemini-3.8-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      }
+    });
+    
+    const text = response.text || "{}";
+    return JSON.parse(text);
   } catch (error) {
     console.error("Gemini pre-flight check failed:", error);
     return {
@@ -56,8 +67,11 @@ export async function anonymizeManuscript(content: string) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const response = await ai.models.generateContent({
+      model: "gemini-3.8-flash",
+      contents: prompt,
+    });
+    return response.text?.trim() || content;
   } catch (error) {
     console.error("Gemini anonymization failed:", error);
     return content; // Fallback to original content
