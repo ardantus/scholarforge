@@ -1,0 +1,6 @@
+{
+  "name": "ScholarForge",
+  "description": "A modern, next-generation academic journal publishing platform with real-time collaborative editing and automated pre-flight integrity.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
